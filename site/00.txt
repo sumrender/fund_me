@@ -1,0 +1,55 @@
+Recap: 13:38:52
+
+When Building Dapps, you usually have 2 repos
+
+- One for smart contracts
+- One for front end/ websites
+
+How websites work with web3 wallets, short video
+- it basically said that, wallets allow us to link with a node on 
+ a blockchain.
+
+window.ethereum object is present in browser
+because we have installed metamask extension
+
+Creating a simple html file
+
+Connecting HTML to metamask
+
+can add try catch to index.js connect function
+
+ES6 vs NodeJS
+
+create fund function
+for the fund function to work, we require 
+    // provider or connection to the blockchain
+    // signer / wallet / someone with some gas
+    // contract that we are interacting with
+    // ABI and address
+
+
+// IMPORTING
+To access ether object from
+ethers-5.1.esm.min.js, or 
+contractAddress from constants.js
+REMEMBER to add ".js" at the end of file names
+
+
+13:07 => Sending a Transaction from a website
+    creating a constants.js file to store abi and address.
+
+RPC Error something nonce, something Transactions
+can't be queued when automining
+// will generally occur for hardhat local chain
+then reset account => 13:19
+metamask > setting > advanced > reset account
+
+creating other functions
+
+// didn't understand the part where they 
+// used a function without async,
+// listenForTransaction part
+
+
+// maybe can be done by then and catch 
+// inside the listener function 

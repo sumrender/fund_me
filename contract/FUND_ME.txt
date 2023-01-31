@@ -1,0 +1,282 @@
+$ yarn add --dev hardhat
+// to install hardhat
+
+$ yarn hardhat 
+// to create project
+
+// Linting
+
+Solhint is solidity linter, it came with older version.
+can be added using hardhat plugins
+
+// Compiling
+will throw error since, we have not imported Aggregator contract
+of Chainlink which we imported for our use
+ import the package then for Compiling
+ 
+ $ yarn add --dev @chainlink/contracts
+ $ yarn hardhat compile // for compiling.
+
+// Deploying
+
+
+    using hardhat-deploy package
+
+    why are we using it?
+    This hardhat plugin adds a mechanism to deploy contracts to 
+    any network, keeping track of them and replicating the same 
+    environment for testing.
+
+    It also adds a mechanism to associate names to addresses, so 
+    test and deployment scripts can be reconfigured by simply 
+    changing the address a name points to, allowing different 
+    configurations per network. This also results in much clearer 
+    tests and deployment scripts (no more accounts[0] in your code).
+
+    // installation
+    $ yarn add --dev hardhat-deploy
+
+    // then require it in hardhat.config.js
+    require("hardhat-deploy")
+
+
+// deleting deploy scripts and making deploy folder
+// in root directory
+// also installing hardhat-ethers as told in hardhat-deploy installation
+// readme.
+
+$ yarn add --dev @nomiclabs/hardhat-ethers@npm:hardhat-deploy-ethers ethers
+
+now we will number the deploy scripts, as they will work 
+numerically, so my first file in deploy folder will be named
+
+01-deploy-fund-me.js
+
+// creating deployFundMe function, creating namedAccounts in hardhat.config
+
+// go to hardhat.config.js and load dotenv module
+// then, add details for goerli network
+
+
+// Mocking & helper-hardhat-config: 10:21:05
+
+// need for a mock?
+// to replicate pricefeed or other complex object behavior on our 
+// local chain, instead of running test chain always which takes a
+// lot of time, we can just simulate the same behavior on our local 
+// net using mocks
+
+// creating price converter mock, since the address we were using 
+// was for rinkeby test network
+
+changed FundMe and PriceConverter contracts such that they can 
+adapt to any network's priceFeed Aggregator object
+
+creating helper-hardhat-config js, where we write all the 
+conditions for the code to select which address to pick 
+for priceFeed object.
+
+after that add the networkConfig to 01-deploy 
+
+now making 00-deploy-mocks for local chain network,
+we are doing this, as we don't have priceFeed for our localhost
+chain: 31337, so we will just deploy a minimalistic
+version for that, and use it for pricefeed purposes
+
+for that we have to create a mock contract, and we will create it 
+in contracts/test folder since we are basically going to use it 
+for testing.
+
+but thank to the developers, I've already got mock file in the package
+itself so, I don't have to worry to much, just need to import a mock
+
+can also, add several versions of solidity in hardhat-config 
+
+use of tags to only run certain file,
+-----> added at the bottom of 00-deploy-mock 
+more reading required
+to run => $ yarn hardhat deploy --tags mocks
+
+10:52:36 => now completing 01-deploy file and executing finally using 
+$ yarn hardhat deploy 
+
+running both 00-deploy-mocks and 01-deploy-fund-me successfully
+
+what is happening is, that 01-deploy will absolutely be deployed 
+since it is the main file, but the 00-deploy-mock file will only 
+be deployed when we are on hardhat or local hardhat chain.
+
+// running for hardhat local blockchain
+$ yarn hardhat node
+
+10:52:52 => UTILS FOLDER 
+
+going to run for rinkeby network, before that we want to 
+add the function for verify, which we will add in 'utils' folder 
+
+10:55:46 => Testnet Demo 
+    cleaning hardhat.config and adding blockConfirmations to 
+    goerli networks 
+
+    deploying using:
+    $ yarn hardhat deploy --network goerli
+
+11:00:11 => Solidity Style Guide
+
+Order of file:
+    1. Pragma statements
+    2. Import statements
+    3. Interfaces
+    4. Libraries
+    5. Contracts 
+
+Inside each contract:
+    Type declaration
+    State variables
+    Events 
+    Modifiers
+    Functions
+
+11:05 => creating documentation natspec.... see later or as per need.
+// just tells how to add comments above functions,
+// which later converts to documentation easily
+
+// Functions Order  
+    constructor
+    receive
+    fallback
+    external
+    public
+    internal 
+    private
+    view/pure
+
+11:09:13 -> Testing Fund Me 
+    creating folders staging and unit 
+
+    unit tests are done locally on a 
+    - local hardhat 
+    - forked hardhat, talk later on this
+
+    staging tests are done on a testnet (LAST STOP!!!)
+
+    $ yarn hardhat test // to run tests 
+    $ yarn hardhat coverage // to see portions that tests cover.
+
+=> first writing unit tests
+
+  describe("FundMe", async function(){
+    beforeEach() // block
+    // tests
+  })
+
+=> stuck on test 1 due to inability to copy code properly
+
+SEARCH: how to write test cases for fallback and receive
+commenting out fallback and recieve, so that I won't have to 
+write tests about them and will probably be covered later.
+
+// to run an individual test
+$ yarn hardhat test --grep "amount funded"
+
+testing withdraw function
+while testing we follow, 
+
+Arrange
+Act
+Assert
+
+can also use debugger by creating a breakpoint
+=> 11:35:00 something
+
+11:37:18 => can also use console.log() in .sol files by importing,
+	import "hardhat/console.sol";
+
+11:39:47 => testing withdrawing funds for multiple funders
+
+earlier we had connected our fundMe contract with the deployer,
+now we need to connect the contract with the diff accounts, 
+we will be funding it with using a for loop
+
+The for loop is starting with i=1 since 0th account is the deployer.
+
+writing remaining tests for withdraw function
+
+then use gasReporter, 
+need to add the code in hardhat.config.js
+
+
+GAS OPTIMIZATIONS =>
+
+Need to know about how storage works in solidity:
+
+Storage Playground Contract
+https://github.com/PatrickAlphaC/hardhat-fund-me-fcc/blob/main/contracts/exampleContracts/FunWithStorage.sol
+
+Storage Playground Deploy Script
+https://github.com/PatrickAlphaC/hardhat-fund-me-fcc/blob/main/scripts/exampleScript/fundMeStorage.js
+
+
+work with storage contract and play with locations and data 
+and what not
+
+11:52 => Gas Optimizations using Storage Knowledge
+running gas-reporter by enabling it in hardhat-config
+
+EVM opcodes cost gas
+ex: add requires 3gas
+    storing and loading a string takes a lot of gas
+
+So, refactor storage variables by adding "s_" in front
+ex: funders ====> s_funders
+
+creating a cheaper withdraw function, then comparing gasReport
+// MAPPINGS can't be in memory, sorry
+
+12:05:29 => Solidity Chainlink Style Guide
+	once again refactoring our code
+
+and creating getter functions since whoever uses our codes
+gets proper API and doesn't have to work with weird s_variable 
+or i_variable
+
+changing unit tests variable use with function calls.
+
+Replacing require with revert, since with require we are storing a
+massive string which takes a lot of storage,
+
+only done with owner test, can do for more
+
+12:10:59 => STAGING TESTS
+
+wasted so much time on staging tests,
+due to not adding gas in hardhat rinkeby limit,
+that was the key point
+
+To run test for hardhat chain:
+  $ yarn hardhat test
+
+To run test for goerli chain:
+  $ yarn hardhat test --network goerli
+
+PROBABLY NEED MORE GAS FOR STAGING TEST TO 
+RUN FOR GOERLI NETWORK, moving on
+
+12:17:59 => Running Scripts on a Local Node
+
+creating a script fund.js
+
+set up local chain
+$ yarn hardhat node
+
+run fund.js script
+$ yarn hardhat run scripts/fund.js --network localhost
+
+run withdraw.js script
+$ yarn hardhat run script/withdraw.js --network localhost
+
+OR WHICHEVER network you prefer
+
+// ADDING SCRIPTS TO PACKAGE.JSON
+
+// PUSHING TO GITHUB
